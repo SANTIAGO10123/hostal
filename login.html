@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar sesión</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container d-flex justify-content-center align-items-center" style="min-height: 100vh;">
+        <div class="card" style="width: 100%; max-width: 400px;">
+            <div class="card-body">
+                <h5 class="card-title text-center">Iniciar sesión</h5>
+                <form method="POST">
+                    <div class="form-group">
+                        <label for="username">Usuario</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Contraseña</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Iniciar sesión</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy/+pG4mLftj4H2Xy5s9F1jlJe9W+63v8k5T2tS4" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js" integrity="sha384-pzjw8f+ua7Kw1TIq0ddYf5v5rmj29nXXDd2tnt57TjWxy5zsaU5KC5QBGJSdD0M2" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-pzjw8f+ua7Kw1TIq0ddYf5v5rmj29nXXDd2tnt57TjWxy5zsaU5KC5QBGJSdD0M2" crossorigin="anonymous"></script>
+
+  <!-- Flecha para volver al inicio o a la página anterior -->
+    <!-- Flecha para volver al inicio o a la página anterior -->
+    <div class="back-arrow" onclick="goBack()">
+        <i class="fas fa-arrow-left"></i> <!-- Icono de la flecha -->
+    </div>
+
+    <!-- JavaScript para mostrar la flecha solo en páginas internas -->
+    <script>
+        // Función para mostrar la flecha solo en páginas internas
+        window.onload = function() {
+            if (window.location.pathname !== "/") {
+                document.querySelector('.back-arrow').style.display = "block"; // Muestra la flecha solo si no estamos en la página principal
+            } else {
+                document.querySelector('.back-arrow').style.display = "none"; // Esconde la flecha en la página principal
+            }
+        };
+
+        // Función para volver a la página anterior o al inicio
+        function goBack() {
+            if (document.referrer) {
+                window.history.back(); // Volver a la página anterior
+            } else {
+                window.location.href = "{{ url_for('index') }}"; // Redirigir al inicio si no hay página anterior
+            }
+        }
+    </script>
+
+
+    
+
+</body>
+
+</html>

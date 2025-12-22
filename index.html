@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hostal el Pas</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+
+    <!-- Estilos propios -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        /* Título más grande y destacado */
+        h1.display-3 {
+            font-size: 4rem;
+            font-weight: 700;
+        }
+
+        /* Barra de navegación sticky */
+        nav {
+            position: sticky;
+            top: 0;
+            background-color: #343a40;
+            padding: 10px 0;
+            z-index: 9999;
+        }
+
+        /* Estilo para los enlaces del menú */
+        nav a {
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            display: inline-block;
+        }
+
+        nav a:hover {
+            color: #f0f0f0;
+        }
+
+        /* Carrusel */
+        .carousel-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 20px auto;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+
+        .carousel-images {
+            display: flex;
+            transition: transform 1s ease-in-out;
+        }
+
+        .carousel-images img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        /* Estilos para la flecha en la esquina */
+        .back-arrow {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 2rem;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 9999;
+            display: none; /* Ocultar por defecto */
+        }
+
+        .back-arrow:hover {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        /* Selector de idioma */
+        .lang-selector {
+            color: white;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 10px;
+            font-size: 1rem;
+        }
+
+        .lang-selector:hover {
+            color: #f0f0f0;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="container text-center py-4">
+            <!-- Título destacado -->
+            <h1 class="display-3 font-weight-bold" id="hostal-name">Hostal el Pas</h1>
+        </div>
+
+        <!-- Barra de navegación sticky -->
+        <nav class="container text-center">
+            <a href="{{ url_for('login') }}" id="login-text">Iniciar sesión</a>
+            <a href="{{ url_for('contacto') }}" id="contact-text">Contacto</a>
+            <a href="{{ url_for('reservas') }}" id="reservas-text">Reservas</a>
+
+            <!-- Selector de idiomas -->
+            <select class="lang-selector" id="lang-select">
+                <option value="es">Español</option>
+                <option value="ca">Català</option>
+                <option value="en">English</option>
+            </select>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Mensaje de bienvenida -->
+        <div class="container py-5 text-center">
+            <h2 id="welcome-message">¡Bienvenido a tu hogar fuera de casa!</h2>
+            <p id="welcome-description">Relájate y disfruta de una estancia cómoda en nuestro hostal. Aquí encontrarás todo lo que necesitas para tu comodidad.</p>
+        </div>
+
+        <!-- Carrusel de imágenes -->
+        <div class="carousel-container">
+            <div class="carousel-images" id="carouselImages">
+                <img src="{{ url_for('static', filename='img/imguno.jpg') }}" alt="Imagen 1">
+                <img src="{{ url_for('static', filename='img/imgdos.jpg') }}" alt="Imagen 2">
+                <img src="{{ url_for('static', filename='img/imgtres.jpg') }}" alt="Imagen 3">
+            </div>
+        </div>
+    </main>
+
+    <!-- Flecha para volver al inicio o a la página anterior -->
+    <div class="back-arrow" onclick="goBack()">
+        <i class="fas fa-arrow-left"></i>
+    </div>
+
+    <script>
+        // Diccionario con las traducciones para cada idioma
+        const translations = {
+            es: {
+                "hostal-name": "Hostal el Pas",
+                "login-text": "Iniciar sesión",
+                "contact-text": "Contacto",
+                "reservas-text": "Reservas",
+                "welcome-message": "¡Bienvenido a tu hogar fuera de casa!",
+                "welcome-description": "Relájate y disfruta de una estancia cómoda en nuestro hostal. Aquí encontrarás todo lo que necesitas para tu comodidad."
+            },
+            ca: {
+                "hostal-name": "Hostal el Pas",
+                "login-text": "Iniciar sessió",
+                "contact-text": "Contacte",
+                "reservas-text": "Reserves",
+                "welcome-message": "Benvingut a la teva llar fora de casa!",
+                "welcome-description": "Relaxeu-vos i gaudiu d'una estada còmoda al nostre hostal. Aquí trobareu tot el que necessiteu per a la vostra comoditat."
+            },
+            en: {
+                "hostal-name": "Hostal el Pas",
+                "login-text": "Login",
+                "contact-text": "Contact",
+                "reservas-text": "Reservations",
+                "welcome-message": "Welcome to your home away from home!",
+                "welcome-description": "Relax and enjoy a comfortable stay at our hostel. Here you will find everything you need for your comfort."
+            }
+        };
+
+        // Función para cambiar el idioma
+        function changeLanguage(language) {
+            const elements = document.querySelectorAll('[id]'); // Seleccionar todos los elementos con id
+            elements.forEach(element => {
+                const id = element.id;
+                if (translations[language][id]) {
+                    element.textContent = translations[language][id];
+                }
+            });
+        }
+
+        // Detectar cambio de idioma desde el selector
+        document.getElementById('lang-select').addEventListener('change', function () {
+            changeLanguage(this.value);
+        });
+
+        // Establecer idioma inicial (por defecto es español)
+        window.onload = function () {
+            changeLanguage('es');
+        };
+
+        // Función para volver a la página anterior
+        function goBack() {
+            if (document.referrer) {
+                window.history.back();
+            } else {
+                window.location.href = "{{ url_for('index') }}"; // Redirigir al inicio si no hay página anterior
+            }
+        }
+
+        // Mostrar la flecha solo en páginas internas
+        if (window.location.pathname !== "/") {
+            document.querySelector('.back-arrow').style.display = "block"; // Mostrar la flecha
+        }
+
+         // Función para mostrar la flecha solo en páginas internas
+        window.onload = function() {
+            if (window.location.pathname !== "/") {
+                document.querySelector('.back-arrow').style.display = "block"; // Muestra la flecha solo si no estamos en la página principal
+            } else {
+                document.querySelector('.back-arrow').style.display = "none"; // Esconde la flecha en la página principal
+            }
+        };
+
+        // Función para volver a la página anterior o al inicio
+        function goBack() {
+            if (document.referrer) {
+                window.history.back(); // Volver a la página anterior
+            } else {
+                window.location.href = "{{ url_for('index') }}"; // Redirigir al inicio si no hay página anterior
+            }
+        }
+    </script>
+
+    <!-- Bootstrap JS y dependencias -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy/+pG4mLftj4H2Xy5s9F1jlJe9W+63v8k5T2tS4" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js" integrity="sha384-pzjw8f+ua7Kw1TIq0ddYf5v5rmj29nXXDd2tnt57TjWxy5zsaU5KC5QBGJSdD0M2" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-pzjw8f+ua7Kw1TIq0ddYf5v5rmj29nXXDd2tnt57TjWxy5zsaU5KC5QBGJSdD0M2" crossorigin="anonymous"></script> 
+    <!-- Flecha para volver al inicio o a la página anterior -->
+    <div class="back-arrow" onclick="goBack()">
+        <i class="fas fa-arrow-left"></i> <!-- Icono de la flecha -->
+    </div>
+
+   
+    
+
+
+
+    
+</body>
+
+</html>

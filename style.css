@@ -1,0 +1,93 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+header {
+    background-color: #2d3a3a;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+nav a {
+    margin: 0 10px;
+    color: white;
+    text-decoration: none;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+main {
+    padding: 20px;
+}
+
+form {
+    max-width: 400px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+input, textarea, button {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+button {
+    background-color: #2d3a3a;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #4d5d5d;
+}
+
+/* Estilo para el carrusel de imágenes */
+.carousel-container {
+    width: 100%;
+    max-width: 800px; /* Establece el tamaño máximo del carrusel */
+    margin: 20px auto; /* Centra el carrusel */
+    overflow: hidden;
+    border-radius: 10px;
+    position: relative;
+}
+
+.carousel-images {
+    display: flex;
+    transition: transform 1s ease-in-out;
+}
+
+.carousel-images img {
+    width: 100%;
+    height: auto;
+    object-fit: cover; /* Asegura que las imágenes cubran todo el contenedor sin distorsionarse */
+    object-position: center; /* Centra las imágenes dentro del contenedor */
+    margin-right: 10px; /* Espacio entre las imágenes */
+    flex-shrink: 0; /* Evita que las imágenes se encojan */
+}
+
+/* Para asegurarnos de que no haya espacio extra al final */
+.carousel-images img:last-child {
+    margin-right: 0;
+}
+
+button {
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #4CAF50;
+}
+
