@@ -284,6 +284,7 @@
             <a href="{{ url_for('index') }}" target="_blank">
                 <i class="fas fa-external-link-alt"></i> Ver Sitio Web
             </a>
+
             <div class="mt-4"></div>
             <a href="{{ url_for('logout') }}" class="text-warning">
                 <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
@@ -453,17 +454,17 @@
                     <div class="card-body">
                         <div class="quick-actions">
                             <div class="row">
-                                <div class="col-6 mb-3">
-                                    <button class="btn btn-outline-primary btn-block" onclick="window.location.href='{{ url_for('ver_reservas') }}'">
+                                <div class="card-footer bg-white border-0 py-3">
+                                    <button class="btn btn-outline-primary btn-block" onclick="window.location.href='{{ url_for('ver_reservas') }}';">
                                         <i class="fas fa-search fa-2x mb-2"></i><br>
                                         Buscar Reserva
                                     </button>
                                 </div>
                                 <div class="col-6 mb-3">
-                                    <button class="btn btn-outline-success btn-block" onclick="window.open('{{ url_for('index') }}', '_blank')">
+                                    <a href="{{ url_for('index') }}" target="_blank" class="btn btn-outline-success btn-block">
                                         <i class="fas fa-plus fa-2x mb-2"></i><br>
                                         Nueva Reserva
-                                    </button>
+                                    </a>
                                 </div>
                                 {% if session.rol == 'administrador' %}
                                 <div class="col-6 mb-3">

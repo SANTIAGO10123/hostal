@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Nueva Reserva - Hostal el Pas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Bootstrap Datepicker -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .reservation-form-container {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .room-card {
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .room-card:hover {
+            border-color: #3498db;
+            transform: translateY(-3px);
+        }
+        
+        .room-card.selected {
+            border-color: #2ecc71;
+            background: #f0fff4;
+        }
+        
+        .room-icon {
+            font-size: 2.5rem;
+            color: #3498db;
+            margin-bottom: 15px;
+        }
+        
+        .room-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .date-highlight {
+            background: #e3f2fd;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .price-summary {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e1e8ed;
+        }
+        
+        .summary-total {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .btn-reservar {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-reservar:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 15px rgba(46, 204, 113, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #2c3e50, #34495e);">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-hotel"></i> Hostal el Pas
+            </a>
+            <div class="navbar-nav ml-auto">
+                {% if session.get('user_id') %}
+                    <span class="navbar-text text-white mr-3">
+                        <i class="fas fa-user"></i> {{ session.nombre }}
+                    </span>
+                    <a class="btn btn-outline-light btn-sm" href="{{ url_for('perfil_cliente') if session.rol == 'cliente' else url_for('dashboard') }}">
+                        Mi Cuenta
+                    </a>
+                {% else %}
+                    <a class="btn btn-outline-light btn-sm mr-2" href="{{ url_for('login') }}">
+                        <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                    </a>
+                    <a class="btn btn-light btn-sm" href="{{ url_for('registro_cliente') }}">
+                        <i class="fas fa-user-plus"></i> Registrarse
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container py-4">
+        <div class="reservation-form-container">
+            <h2 class="text-center mb-4"><i class="fas fa-calendar-plus"></i> Nueva Reserva</h2>
+            
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <form method="POST" action="{{ url_for('crear_reserva') }}" id="reservaForm">
+                <!-- Step 1: Datos del Cliente -->
+                <div class="mb-5">
+                    <h4 class="mb-3"><i class="fas fa-user"></i> Datos del Cliente</h4>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="nombre" class="form-label">Nombre Completo *</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" required 
+                                   value="{{ session.nombre if session.nombre else '' }}">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">Correo Electrónico *</label>
+                            <input type="email" class="form-control" id="email" name="email" required
+                                   value="{{ session.email if session.email else '' }}">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="telefono" class="form-label">Teléfono *</label>
+                            <input type="tel" class="form-control" id="telefono" name="telefono" required>
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="documento" class="form-label">Documento de Identidad</label>
+                            <input type="text" class="form-control" id="documento" name="documento">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 2: Fechas -->
+                <div class="mb-5">
+                    <h4 class="mb-3"><i class="fas fa-calendar-alt"></i> Fechas de Estancia</h4>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="fecha_entrada" class="form-label">Fecha de Entrada *</label>
+                            <input type="date" class="form-control" id="fecha_entrada" name="fecha_entrada" required
+                                   min="{{ hoy }}">
+                        </div>
+                        
+                        <div class="col-md-6 mb-3">
+                            <label for="fecha_salida" class="form-label">Fecha de Salida *</label>
+                            <input type="date" class="form-control" id="fecha_salida" name="fecha_salida" required
+                                   min="{{ hoy }}">
+                        </div>
+                    </div>
+                    
+                    <div class="date-highlight">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <strong>Noches:</strong>
+                                <span id="noches">0</span> noches
+                            </div>
+                            <div>
+                                <strong>Check-in:</strong> A partir de las 14:00h
+                            </div>
+                            <div>
+                                <strong>Check-out:</strong> Hasta las 12:00h
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Step 3: Habitación -->
+                <div class="mb-5">
+                    <h4 class="mb-3"><i class="fas fa-bed"></i> Selecciona tu Habitación</h4>
+                    <div class="row" id="habitaciones-container">
+                        <!-- Las habitaciones se cargarán con JavaScript -->
+                    </div>
+                    
+                    <input type="hidden" id="tipo_habitacion" name="tipo_habitacion" required>
+                    <input type="hidden" id="precio_noche" name="precio_noche">
+                </div>
+                
+                <!-- Step 4: Personas -->
+                <div class="mb-5">
+                    <h4 class="mb-3"><i class="fas fa-users"></i> Número de Personas</h4>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="numero_personas" class="form-label">Número de Personas *</label>
+                            <select class="form-control" id="numero_personas" name="numero_personas" required>
+                                <option value="1">1 persona</option>
+                                <option value="2" selected>2 personas</option>
+                                <option value="3">3 personas</option>
+                                <option value="4">4 personas</option>
+                                <option value="5">5 personas</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label for="observaciones" class="form-label">Observaciones</label>
+                            <textarea class="form-control" id="observaciones" name="observaciones" rows="2" 
+                                      placeholder="Ej: Cama adicional, alergias, necesidades especiales..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Price Summary -->
+                <div class="price-summary">
+                    <h5 class="mb-3">Resumen de la Reserva</h5>
+                    
+                    <div class="summary-item">
+                        <span>Habitación seleccionada:</span>
+                        <span id="summary-habitacion">-</span>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <span>Noches:</span>
+                        <span id="summary-noches">0</span>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <span>Precio por noche:</span>
+                        <span id="summary-precio-noche">€0.00</span>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <span>Subtotal:</span>
+                        <span id="summary-subtotal">€0.00</span>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <span>Impuestos (10%):</span>
+                        <span id="summary-impuestos">€0.00</span>
+                    </div>
+                    
+                    <div class="summary-item summary-total">
+                        <span>TOTAL:</span>
+                        <span id="summary-total">€0.00</span>
+                    </div>
+                </div>
+                
+                <!-- Submit Button -->
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-reservar btn-lg">
+                        <i class="fas fa-check-circle"></i> Confirmar Reserva
+                    </button>
+                    
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-lg ml-2">
+                        <i class="fas fa-times"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.es.min.js"></script>
+    
+    <script>
+        // Habitaciones disponibles con precios
+        const habitaciones = [
+            {
+                id: 'individual',
+                nombre: 'Habitación Individual',
+                descripcion: 'Cama individual, baño privado, wifi',
+                icono: 'fas fa-user',
+                capacidad: 1,
+                precio: 45,
+                disponible: true
+            },
+            {
+                id: 'doble',
+                nombre: 'Habitación Doble',
+                descripcion: 'Cama doble o dos individuales, baño privado, wifi',
+                icono: 'fas fa-bed',
+                capacidad: 2,
+                precio: 65,
+                disponible: true
+            },
+            {
+                id: 'familiar',
+                nombre: 'Habitación Familiar',
+                descripcion: 'Dos dormitorios, baño privado, wifi, terraza',
+                icono: 'fas fa-home',
+                capacidad: 4,
+                precio: 95,
+                disponible: true
+            },
+            {
+                id: 'suite',
+                nombre: 'Suite Ejecutiva',
+                descripcion: 'Dormitorio + salón, baño de lujo, vista al mar',
+                icono: 'fas fa-crown',
+                capacidad: 2,
+                precio: 120,
+                disponible: true
+            }
+        ];
+        
+        // Variables globales
+        let habitacionSeleccionada = null;
+        let noches = 0;
+        
+        // Inicializar
+        $(document).ready(function() {
+            cargarHabitaciones();
+            calcularNoches();
+            actualizarResumen();
+            
+            // Event listeners
+            $('#fecha_entrada, #fecha_salida').change(function() {
+                calcularNoches();
+                actualizarResumen();
+            });
+            
+            $('#numero_personas').change(function() {
+                validarCapacidad();
+            });
+            
+            // Auto-close alerts after 5 seconds
+            setTimeout(function() {
+                $('.alert').alert('close');
+            }, 5000);
+        });
+        
+        // Cargar las opciones de habitación
+        function cargarHabitaciones() {
+            const container = $('#habitaciones-container');
+            container.empty();
+            
+            habitaciones.forEach(habitacion => {
+                const card = `
+                    <div class="col-md-6 mb-3">
+                        <div class="room-card" data-id="${habitacion.id}">
+                            <div class="text-center">
+                                <div class="room-icon">
+                                    <i class="${habitacion.icono}"></i>
+                                </div>
+                                <h5>${habitacion.nombre}</h5>
+                                <p class="text-muted">${habitacion.descripcion}</p>
+                                <div class="room-price">€${habitacion.precio}/noche</div>
+                                <small>Máx. ${habitacion.capacidad} personas</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.append(card);
+            });
+            
+            // Event listener para selección de habitación
+            $('.room-card').click(function() {
+                const id = $(this).data('id');
+                seleccionarHabitacion(id);
+            });
+            
+            // Seleccionar la primera habitación por defecto
+            if (habitaciones.length > 0) {
+                seleccionarHabitacion(habitaciones[0].id);
+            }
+        }
+        
+        // Seleccionar habitación
+        function seleccionarHabitacion(id) {
+            habitacionSeleccionada = habitaciones.find(h => h.id === id);
+            
+            // Actualizar UI
+            $('.room-card').removeClass('selected');
+            $(`.room-card[data-id="${id}"]`).addClass('selected');
+            
+            // Actualizar campos ocultos
+            $('#tipo_habitacion').val(habitacionSeleccionada.nombre);
+            $('#precio_noche').val(habitacionSeleccionada.precio);
+            
+            // Validar capacidad
+            validarCapacidad();
+            
+            // Actualizar resumen
+            actualizarResumen();
+        }
+        
+        // Validar que el número de personas no exceda la capacidad
+        function validarCapacidad() {
+            if (!habitacionSeleccionada) return;
+            
+            const personas = parseInt($('#numero_personas').val());
+            
+            if (personas > habitacionSeleccionada.capacidad) {
+                $('#numero_personas').addClass('is-invalid');
+                $('#numero_personas').next('.invalid-feedback').remove();
+                $('#numero_personas').after(
+                    `<div class="invalid-feedback">Esta habitación solo admite ${habitacionSeleccionada.capacidad} personas</div>`
+                );
+                return false;
+            } else {
+                $('#numero_personas').removeClass('is-invalid');
+                return true;
+            }
+        }
+        
+        // Calcular número de noches
+        function calcularNoches() {
+            const entrada = new Date($('#fecha_entrada').val());
+            const salida = new Date($('#fecha_salida').val());
+            
+            if (entrada && salida && salida > entrada) {
+                const diffTime = Math.abs(salida - entrada);
+                noches = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                // Validar que haya al menos 1 noche
+                if (noches < 1) {
+                    noches = 0;
+                    $('#fecha_salida').addClass('is-invalid');
+                } else {
+                    $('#fecha_salida').removeClass('is-invalid');
+                }
+            } else {
+                noches = 0;
+            }
+            
+            $('#noches').text(noches);
+        }
+        
+        // Actualizar resumen de precios
+        function actualizarResumen() {
+            if (!habitacionSeleccionada) return;
+            
+            const precioNoche = habitacionSeleccionada.precio;
+            const subtotal = precioNoche * noches;
+            const impuestos = subtotal * 0.10;
+            const total = subtotal + impuestos;
+            
+            // Actualizar elementos del resumen
+            $('#summary-habitacion').text(habitacionSeleccionada.nombre);
+            $('#summary-noches').text(noches);
+            $('#summary-precio-noche').text(`€${precioNoche.toFixed(2)}`);
+            $('#summary-subtotal').text(`€${subtotal.toFixed(2)}`);
+            $('#summary-impuestos').text(`€${impuestos.toFixed(2)}`);
+            $('#summary-total').text(`€${total.toFixed(2)}`);
+        }
+        
+        // Validación del formulario antes de enviar
+        $('#reservaForm').submit(function(e) {
+            // Validar que se haya seleccionado una habitación
+            if (!habitacionSeleccionada) {
+                e.preventDefault();
+                alert('Por favor, selecciona una habitación.');
+                return false;
+            }
+            
+            // Validar capacidad
+            if (!validarCapacidad()) {
+                e.preventDefault();
+                alert('El número de personas excede la capacidad de la habitación.');
+                return false;
+            }
+            
+            // Validar que haya al menos 1 noche
+            if (noches < 1) {
+                e.preventDefault();
+                alert('Por favor, selecciona fechas válidas (mínimo 1 noche).');
+                return false;
+            }
+            
+            // Validar que la fecha de salida sea posterior a la de entrada
+            const entrada = new Date($('#fecha_entrada').val());
+            const salida = new Date($('#fecha_salida').val());
+            
+            if (salida <= entrada) {
+                e.preventDefault();
+                alert('La fecha de salida debe ser posterior a la de entrada.');
+                return false;
+            }
+            
+            // Deshabilitar botón para evitar múltiples envíos
+            const submitBtn = $(this).find('button[type="submit"]');
+            submitBtn.prop('disabled', true);
+            submitBtn.html('<i class="fas fa-spinner fa-spin"></i> Procesando reserva...');
+            
+            return true;
+        });
+        
+        // Set minimum dates
+        const today = new Date().toISOString().split('T')[0];
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const tomorrowStr = tomorrow.toISOString().split('T')[0];
+        
+        $('#fecha_entrada').val(today);
+        $('#fecha_salida').val(tomorrowStr);
+    </script>
+</body>
+</html>

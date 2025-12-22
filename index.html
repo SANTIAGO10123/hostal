@@ -119,6 +119,8 @@
             <a href="{{ url_for('registro_cliente') }}" id="register-text">Registrarse</a> <!-- NUEVO -->
             <a href="{{ url_for('contact') }}" id="contact-text">Contacto</a>
             <a href="{{ url_for('ver_reservas') }}" id="reservas-text">Reservas</a>
+            <a href="{{ url_for('reservar') }}" id="reservar-text">Reservar Ahora</a>
+
 
             <!-- Selector de idiomas -->
             <select class="lang-selector" id="lang-select">
@@ -146,7 +148,7 @@
         </div>
     </main>
 
-    <script>
+     <script>
         // Diccionario con las traducciones para cada idioma
         const translations = {
             es: {
@@ -154,6 +156,7 @@
                 "login-text": "Iniciar sesión",
                 "contact-text": "Contacto",
                 "register-text": "Registrarse",
+                "reservar-text": "Reservar Ahora",
                 "reservas-text": "Reservas",
                 "welcome-message": "¡Bienvenido a tu hogar fuera de casa!",
                 "welcome-description": "Relájate y disfruta de una estancia cómoda en nuestro hostal. Aquí encontrarás todo lo que necesitas para tu comodidad."
@@ -162,6 +165,7 @@
                 "hostal-name": "Hostal el Pas",
                 "login-text": "Iniciar sessió",
                 "contact-text": "Contacte",
+                "reservar-text": "Reserva Ara",
                 "register-text": "Registrar-se",
                 "reservas-text": "Reserves",
                 "welcome-message": "Benvingut a la teva llar fora de casa!",
@@ -172,6 +176,7 @@
                 "login-text": "Login",
                 "contact-text": "Contact",
                 "register-text": "Register",
+                "reservar-text": "Book Now",
                 "reservas-text": "Reservations",
                 "welcome-message": "Welcome to your home away from home!",
                 "welcome-description": "Relax and enjoy a comfortable stay at our hostel. Here you will find everything you need for your comfort."
@@ -180,66 +185,52 @@
 
         // Función para cambiar el idioma
         function changeLanguage(language) {
-            const elements = document.querySelectorAll('[id]'); // Seleccionar todos los elementos con id
+            const elements = document.querySelectorAll('[id]');
             elements.forEach(element => {
                 const id = element.id;
-                if (translations[language][id]) {
+                if (translations[language] && translations[language][id]) {
                     element.textContent = translations[language][id];
                 }
             });
         }
 
         // Detectar cambio de idioma desde el selector
-        document.getElementById('lang-select').addEventListener('change', function () {
+        document.getElementById('lang-select').addEventListener('change', function() {
             changeLanguage(this.value);
         });
-
-        // Establecer idioma inicial (por defecto es español)
-        window.onload = function () {
-            changeLanguage('es');
-        };
 
         // Función para volver a la página anterior
         function goBack() {
             if (document.referrer) {
                 window.history.back();
             } else {
-                window.location.href = "{{ url_for('index') }}"; // Redirigir al inicio si no hay página anterior
+                window.location.href = "{{ url_for('index') }}";
             }
         }
 
-        // Mostrar la flecha solo en páginas internas
-        if (window.location.pathname !== "/") {
-            document.querySelector('.back-arrow').style.display = "block"; // Mostrar la flecha
-        }
-
-         // Función para mostrar la flecha solo en páginas internas
+        // UNA SOLA FUNCIÓN window.onload
         window.onload = function() {
-            if (window.location.pathname !== "/") {
-                document.querySelector('.back-arrow').style.display = "block"; // Muestra la flecha solo si no estamos en la página principal
-            } else {
-                document.querySelector('.back-arrow').style.display = "none"; // Esconde la flecha en la página principal
+            // 1. Establecer idioma inicial
+            changeLanguage('es');
+            
+            // 2. Mostrar u ocultar la flecha
+            if (window.location.pathname !== "/" && window.location.pathname !== "/index") {
+                const backArrow = document.querySelector('.back-arrow');
+                if (backArrow) {
+                    backArrow.style.display = "block";
+                }
             }
         };
-
-        // Función para volver a la página anterior o al inicio
-        function goBack() {
-            if (document.referrer) {
-                window.history.back(); // Volver a la página anterior
-            } else {
-                window.location.href = "{{ url_for('index') }}"; // Redirigir al inicio si no hay página anterior
-            }
-        }
+    
     </script>
-
+    
+    
     <!-- Bootstrap JS y dependencias -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy/+pG4mLftj4H2Xy5s9F1jlJe9W+63v8k5T2tS4" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js" integrity="sha384-pzjw8f+ua7Kw1TIq0ddYf5v5rmj29nXXDd2tnt57TjWxy5zsaU5KC5QBGJSdD0M2" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js" integrity="sha384-pzjw8f+ua7Kw1TIq0ddYf5v5rmj29nXXDd2tnt57TjWxy5zsaU5KC5QBGJSdD0M2" crossorigin="anonymous"></script> 
     <!-- Flecha para volver al inicio o a la página anterior -->
-    <div class="back-arrow" onclick="goBack()">
-        <i class="fas fa-arrow-left"></i> <!-- Icono de la flecha -->
-    </div>
+    
 
    
     
