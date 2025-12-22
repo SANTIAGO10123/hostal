@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mi Cuenta - Hostal el Pas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .profile-container {
+            max-width: 900px;
+            margin: 30px auto;
+            padding: 20px;
+        }
+        
+        .profile-header {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            border-radius: 15px 15px 0 0;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 5px solid white;
+            background: #ecf0f1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+        
+        .profile-avatar i {
+            font-size: 4rem;
+            color: #3498db;
+        }
+        
+        .profile-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            overflow: hidden;
+        }
+        
+        .profile-card-header {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e1e8ed;
+            font-weight: 600;
+        }
+        
+        .profile-card-body {
+            padding: 20px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f1f1;
+        }
+        
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .info-value {
+            color: #34495e;
+        }
+        
+        .reservation-card {
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+        
+        .reservation-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .reservation-header {
+            background: #f8f9fa;
+            padding: 15px;
+            border-bottom: 1px solid #e1e8ed;
+        }
+        
+        .badge-reserva {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+        
+        .badge-pendiente { background: #f39c12; color: white; }
+        .badge-confirmada { background: #2ecc71; color: white; }
+        .badge-cancelada { background: #e74c3c; color: white; }
+        .badge-completada { background: #3498db; color: white; }
+        
+        .btn-edit {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        .btn-edit:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #7f8c8d;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #2c3e50, #34495e);">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('index') }}">
+                <i class="fas fa-hotel"></i> Hostal el Pas
+            </a>
+            <div class="navbar-nav ml-auto">
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-white" href="#" id="userDropdown" role="button" data-toggle="dropdown">
+                        <i class="fas fa-user-circle"></i> {{ session.nombre }}
+                        <span class="badge badge-light ml-1">{{ session.rol }}</span>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <a class="dropdown-item" href="{{ url_for('perfil_cliente') }}">
+                            <i class="fas fa-user"></i> Mi Perfil
+                        </a>
+                        <a class="dropdown-item" href="#">
+                            <i class="fas fa-calendar-alt"></i> Mis Reservas
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="{{ url_for('logout') }}">
+                            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container profile-container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="profile-avatar">
+                <i class="fas fa-user-circle"></i>
+            </div>
+            <h2>{{ datos[0] }}</h2>
+            <p class="mb-0">Cliente desde: {{ datos[4].strftime('%d/%m/%Y') if datos[4] else 'Reciente' }}</p>
+        </div>
+
+        <div class="row mt-4">
+            <!-- Left Column: Personal Info -->
+            <div class="col-lg-6 mb-4">
+                <div class="profile-card">
+                    <div class="profile-card-header">
+                        <i class="fas fa-id-card mr-2"></i> Información Personal
+                    </div>
+                    <div class="profile-card-body">
+                        <div class="info-row">
+                            <span class="info-label">Nombre completo:</span>
+                            <span class="info-value">{{ datos[0] }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Correo electrónico:</span>
+                            <span class="info-value">{{ datos[1] }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Teléfono:</span>
+                            <span class="info-value">{{ datos[2] or 'No registrado' }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Documento de identidad:</span>
+                            <span class="info-value">{{ datos[3] or 'No registrado' }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Nombre de usuario:</span>
+                            <span class="info-value">@{{ session.username }}</span>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <button class="btn btn-edit" data-toggle="modal" data-target="#editarPerfilModal">
+                                <i class="fas fa-edit"></i> Editar Información
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quick Actions -->
+                <div class="profile-card">
+                    <div class="profile-card-header">
+                        <i class="fas fa-bolt mr-2"></i> Acciones Rápidas
+                    </div>
+                    <div class="profile-card-body">
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <button class="btn btn-outline-primary btn-block" onclick="window.location.href='#'">
+                                    <i class="fas fa-plus-circle fa-2x mb-2"></i><br>
+                                    Nueva Reserva
+                                </button>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <button class="btn btn-outline-success btn-block" onclick="window.location.href='{{ url_for('index') }}'">
+                                    <i class="fas fa-home fa-2x mb-2"></i><br>
+                                    Ver Hostal
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column: Reservations -->
+            <div class="col-lg-6 mb-4">
+                <div class="profile-card h-100">
+                    <div class="profile-card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <i class="fas fa-calendar-check mr-2"></i> Mis Reservas
+                        </div>
+                        <span class="badge badge-primary">{{ reservas|length }}</span>
+                    </div>
+                    <div class="profile-card-body">
+                        {% if reservas %}
+                            {% for reserva in reservas %}
+                            <div class="reservation-card">
+                                <div class="reservation-header d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong>Reserva #{{ reserva[0] }}</strong>
+                                        <small class="text-muted ml-2">{{ reserva[9].strftime('%d/%m/%Y') if reserva[9] else '' }}</small>
+                                    </div>
+                                    <span class="badge-reserva badge-{{ reserva[8] }}">
+                                        {{ reserva[8]|capitalize }}
+                                    </span>
+                                </div>
+                                <div class="p-3">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <small class="text-muted">Entrada</small><br>
+                                            <strong>{{ reserva[4] }}</strong>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted">Salida</small><br>
+                                            <strong>{{ reserva[5] }}</strong>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-2">
+                                        <div class="col-6">
+                                            <small class="text-muted">Habitación</small><br>
+                                            {{ reserva[6] }}
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted">Personas</small><br>
+                                            {{ reserva[7] }}
+                                        </div>
+                                    </div>
+                                    <div class="text-right mt-2">
+                                        <button class="btn btn-sm btn-outline-secondary" onclick="verDetalleReserva({{ reserva[0] }})">
+                                            Ver detalles
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="far fa-calendar-times"></i>
+                                <h5>No tienes reservas aún</h5>
+                                <p class="mb-4">¡Reserva tu primera estada en nuestro hostal!</p>
+                                <button class="btn btn-primary" onclick="window.location.href='#'">
+                                    <i class="fas fa-plus"></i> Hacer mi primera reserva
+                                </button>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Profile Modal -->
+    <div class="modal fade" id="editarPerfilModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Perfil</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form method="POST" action="{{ url_for('actualizar_perfil') }}">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Nombre completo</label>
+                            <input type="text" class="form-control" name="nombre" value="{{ datos[0] }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Teléfono</label>
+                            <input type="tel" class="form-control" name="telefono" value="{{ datos[2] or '' }}">
+                        </div>
+                        <div class="form-group">
+                            <label>Documento de identidad</label>
+                            <input type="text" class="form-control" name="documento" value="{{ datos[3] or '' }}">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <script>
+        // Auto-dismiss alerts after 5 seconds
+        $(document).ready(function() {
+            setTimeout(function() {
+                $('.alert').alert('close');
+            }, 5000);
+        });
+        
+        function verDetalleReserva(id) {
+            alert('Detalles de reserva #' + id + '\nEsta función estará disponible pronto.');
+        }
+        
+        // Update last login time
+        document.addEventListener('DOMContentLoaded', function() {
+            const lastLogin = localStorage.getItem('lastLogin');
+            const now = new Date().toLocaleString('es-ES');
+            localStorage.setItem('lastLogin', now);
+        });
+    </script>
+</body>
+</html>

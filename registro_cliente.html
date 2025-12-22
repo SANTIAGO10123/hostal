@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro de Cliente - Hostal el Pas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+        }
+        
+        .register-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            width: 100%;
+            max-width: 500px;
+        }
+        
+        .register-header {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        .register-body {
+            padding: 30px;
+        }
+        
+        .form-control:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+        
+        .btn-register {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            border: none;
+            padding: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+        }
+        
+        .password-strength {
+            height: 5px;
+            background: #e1e8ed;
+            border-radius: 3px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        
+        .strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s, background 0.3s;
+        }
+        
+        .strength-weak { background: #e74c3c; }
+        .strength-medium { background: #f39c12; }
+        .strength-strong { background: #2ecc71; }
+        
+        .back-link {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: white;
+            text-decoration: none;
+            font-size: 1.2rem;
+        }
+        
+        .back-link:hover {
+            color: #3498db;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    
+    <a href="{{ url_for('index') }}" class="back-link">
+        <i class="fas fa-arrow-left"></i> Volver al inicio
+    </a>
+    
+    <div class="register-container">
+        <div class="register-header">
+            <h4><i class="fas fa-hotel"></i> Hostal el Pas</h4>
+            <p>Crear Cuenta de Cliente</p>
+        </div>
+        
+        <div class="register-body">
+            <!-- Mensajes Flash -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <form method="POST" action="{{ url_for('registro_cliente') }}" id="registerForm">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="nombre" class="form-label">Nombre Completo *</label>
+                        <input type="text" class="form-control" id="nombre" name="nombre" required 
+                               placeholder="Ej: Juan Pérez García">
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="email" class="form-label">Correo Electrónico *</label>
+                        <input type="email" class="form-control" id="email" name="email" required 
+                               placeholder="ejemplo@email.com">
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="username" class="form-label">Nombre de Usuario *</label>
+                        <div class="input-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">@</span>
+                            </div>
+                            <input type="text" class="form-control" id="username" name="username" required 
+                                   placeholder="juan.perez" pattern="[a-zA-Z0-9._]+" minlength="3">
+                        </div>
+                        <small class="form-text text-muted">Solo letras, números, puntos y guiones bajos</small>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="telefono" class="form-label">Teléfono *</label>
+                        <input type="tel" class="form-control" id="telefono" name="telefono" required 
+                               placeholder="+34 600 123 456">
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="password" class="form-label">Contraseña *</label>
+                        <input type="password" class="form-control" id="password" name="password" required 
+                               minlength="6" oninput="checkPasswordStrength(this.value)">
+                        <div class="password-strength">
+                            <div class="strength-bar" id="passwordStrength"></div>
+                        </div>
+                        <small class="form-text text-muted">Mínimo 6 caracteres</small>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="confirm_password" class="form-label">Confirmar Contraseña *</label>
+                        <input type="password" class="form-control" id="confirm_password" name="confirm_password" required 
+                               oninput="checkPasswordMatch()">
+                        <div class="mt-2" id="passwordMatch"></div>
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <label for="documento_identidad" class="form-label">Documento de Identidad</label>
+                    <input type="text" class="form-control" id="documento_identidad" name="documento_identidad" 
+                           placeholder="DNI, Pasaporte, NIE">
+                    <small class="form-text text-muted">Opcional - Para facturación</small>
+                </div>
+                
+                <div class="form-group mb-4">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="terminos" name="terminos" required>
+                        <label class="form-check-label" for="terminos">
+                            Acepto los <a href="#" data-toggle="modal" data-target="#terminosModal">términos y condiciones</a> *
+                        </label>
+                    </div>
+                </div>
+                
+                <button type="submit" class="btn btn-register" id="submitBtn">
+                    <i class="fas fa-user-plus"></i> Crear Cuenta
+                </button>
+                
+                <div class="text-center mt-3">
+                    <p class="mb-2">¿Ya tienes cuenta? <a href="{{ url_for('login') }}">Inicia sesión aquí</a></p>
+                    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-home"></i> Volver al inicio
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal para Términos y Condiciones -->
+    <div class="modal fade" id="terminosModal" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Términos y Condiciones</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <h6>Condiciones de Reserva</h6>
+                    <p>1. El check-in es a partir de las 14:00 y el check-out antes de las 12:00.</p>
+                    <p>2. Se requiere identificación válida al registrarse.</p>
+                    <p>3. Las cancelaciones deben realizarse con 24 horas de antelación.</p>
+                    
+                    <h6 class="mt-4">Privacidad de Datos</h6>
+                    <p>Sus datos personales se utilizarán únicamente para gestionar su reserva y mejorar su experiencia.</p>
+                    
+                    <h6 class="mt-4">Política de Cancelación</h6>
+                    <p>Cancelaciones con más de 24 horas: reembolso completo.</p>
+                    <p>Cancelaciones con menos de 24 horas: 50% de la tarifa.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <script>
+        // Verificar fortaleza de contraseña
+        function checkPasswordStrength(password) {
+            const strengthBar = document.getElementById('passwordStrength');
+            let strength = 0;
+            
+            if (password.length >= 6) strength += 25;
+            if (password.length >= 8) strength += 25;
+            
+            if (password.match(/([a-z].*[A-Z])|([A-Z].*[a-z])/)) strength += 25;
+            
+            if (password.match(/([0-9])/)) strength += 25;
+            
+            strengthBar.style.width = strength + '%';
+            
+            if (strength < 50) {
+                strengthBar.className = 'strength-bar strength-weak';
+            } else if (strength < 75) {
+                strengthBar.className = 'strength-bar strength-medium';
+            } else {
+                strengthBar.className = 'strength-bar strength-strong';
+            }
+        }
+        
+        // Verificar que las contraseñas coincidan
+        function checkPasswordMatch() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            const matchDiv = document.getElementById('passwordMatch');
+            
+            if (confirmPassword === '') {
+                matchDiv.innerHTML = '';
+                return;
+            }
+            
+            if (password === confirmPassword) {
+                matchDiv.innerHTML = '<span class="text-success"><i class="fas fa-check-circle"></i> Las contraseñas coinciden</span>';
+            } else {
+                matchDiv.innerHTML = '<span class="text-danger"><i class="fas fa-exclamation-circle"></i> Las contraseñas no coinciden</span>';
+            }
+        }
+        
+        // Validación del formulario
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            const terminos = document.getElementById('terminos');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Las contraseñas no coinciden. Por favor, verifica.');
+                return false;
+            }
+            
+            if (password.length < 6) {
+                e.preventDefault();
+                alert('La contraseña debe tener al menos 6 caracteres.');
+                return false;
+            }
+            
+            if (!terminos.checked) {
+                e.preventDefault();
+                alert('Debes aceptar los términos y condiciones.');
+                return false;
+            }
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creando cuenta...';
+            return true;
+        });
+        
+        // Auto-cerrar mensajes después de 5 segundos
+        $(document).ready(function() {
+            setTimeout(function() {
+                $('.alert').alert('close');
+            }, 5000);
+        });
+    </script>
+</body>
+</html>

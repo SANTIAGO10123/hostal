@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Registrar Usuario - Hostal el Pas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .registration-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .header-section {
+            border-bottom: 2px solid #f1f1f1;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .form-card {
+            border: 1px solid #e1e8ed;
+            border-radius: 10px;
+            padding: 25px;
+            background: #f8fafc;
+            margin-bottom: 20px;
+        }
+        
+        .required-field::after {
+            content: " *";
+            color: #e74c3c;
+        }
+        
+        .password-strength {
+            height: 5px;
+            background: #e1e8ed;
+            border-radius: 3px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+        
+        .strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s, background 0.3s;
+        }
+        
+        .strength-weak { background: #e74c3c; }
+        .strength-medium { background: #f39c12; }
+        .strength-strong { background: #2ecc71; }
+        
+        .user-list {
+            border: 1px solid #e1e8ed;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .user-item {
+            padding: 15px;
+            border-bottom: 1px solid #e1e8ed;
+            transition: background 0.2s;
+        }
+        
+        .user-item:hover {
+            background: #f8f9fa;
+        }
+        
+        .user-item:last-child {
+            border-bottom: none;
+        }
+        
+        .role-badge {
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+        
+        .badge-admin {
+            background: #3498db;
+            color: white;
+        }
+        
+        .badge-recepcionista {
+            background: #2ecc71;
+            color: white;
+        }
+        
+        .form-control:focus {
+            border-color: #3498db;
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+        
+        .btn-register {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            border: none;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: linear-gradient(135deg, #2c3e50, #34495e);">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('dashboard') }}">
+                <i class="fas fa-hotel"></i> Hostal el Pas
+            </a>
+            <div class="navbar-nav ml-auto">
+                <span class="navbar-text mr-3">
+                    <i class="fas fa-user"></i> {{ session.nombre }}
+                    <span class="badge badge-info ml-1">{{ session.rol }}</span>
+                </span>
+                <a class="btn btn-outline-light btn-sm" href="{{ url_for('dashboard') }}">
+                    <i class="fas fa-arrow-left"></i> Volver al Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container py-4">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="registration-container">
+            <!-- Header -->
+            <div class="header-section">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <h2><i class="fas fa-user-plus text-primary"></i> Registrar Nuevo Usuario</h2>
+                        <p class="text-muted mb-0">Agrega nuevos miembros al equipo del hostal</p>
+                    </div>
+                    <div class="col-md-4 text-right">
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Registration Form -->
+                <div class="col-lg-7 mb-4">
+                    <div class="form-card">
+                        <h5 class="mb-4"><i class="fas fa-user-edit"></i> Información del Usuario</h5>
+                        
+                        <form method="POST" action="{{ url_for('registrar_usuario') }}" id="registerForm">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="nombre" class="required-field">Nombre Completo</label>
+                                    <input type="text" class="form-control" id="nombre" name="nombre" required 
+                                           placeholder="Ej: Juan Pérez">
+                                    <small class="form-text text-muted">Nombre real del usuario</small>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="username" class="required-field">Nombre de Usuario</label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text">@</span>
+                                        </div>
+                                        <input type="text" class="form-control" id="username" name="username" required 
+                                               placeholder="Ej: juan.perez" pattern="[a-zA-Z0-9._]+" minlength="3">
+                                    </div>
+                                    <small class="form-text text-muted">Solo letras, números, puntos y guiones bajos</small>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="email" class="required-field">Correo Electrónico</label>
+                                    <input type="email" class="form-control" id="email" name="email" required 
+                                           placeholder="usuario@ejemplo.com">
+                                    <small class="form-text text-muted">Se usará para notificaciones</small>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="rol" class="required-field">Rol</label>
+                                    <select class="form-control" id="rol" name="rol" required>
+                                        <option value="">Selecciona un rol</option>
+                                        <option value="cliente">Cliente</option>
+                                        <option value="recepcionista">Recepcionista</option>
+                                        <option value="administrador">Administrador</option>
+                                    </select>
+                                    <small class="form-text text-muted">Define los permisos del usuario</small>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="password" class="required-field">Contraseña</label>
+                                    <input type="password" class="form-control" id="password" name="password" required 
+                                           minlength="6" oninput="checkPasswordStrength(this.value)">
+                                    <div class="password-strength">
+                                        <div class="strength-bar" id="passwordStrength"></div>
+                                    </div>
+                                    <small class="form-text text-muted">Mínimo 6 caracteres</small>
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    <label for="confirm_password" class="required-field">Confirmar Contraseña</label>
+                                    <input type="password" class="form-control" id="confirm_password" name="confirm_password" required 
+                                           oninput="checkPasswordMatch()">
+                                    <div class="mt-2" id="passwordMatch"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group mb-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="send_welcome" name="send_welcome" checked>
+                                    <label class="form-check-label" for="send_welcome">
+                                        Enviar email de bienvenida con las credenciales
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <button type="submit" class="btn btn-register" id="submitBtn">
+                                    <i class="fas fa-user-plus"></i> Registrar Usuario
+                                </button>
+                                
+                                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times"></i> Cancelar
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- User List & Instructions -->
+                <div class="col-lg-5">
+                    <div class="mb-4">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header bg-white">
+                                <h5 class="mb-0"><i class="fas fa-users"></i> Usuarios del Sistema</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="user-list">
+                                    {% if usuarios %}
+                                        {% for usuario in usuarios %}
+                                        <div class="user-item">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <h6 class="mb-1">{{ usuario[1] }}</h6>
+                                                    <small class="text-muted">@{{ usuario[2] }}</small>
+                                                </div>
+                                                <span class="role-badge badge-{{ usuario[5] }}">
+                                                    {{ usuario[5]|capitalize }}
+                                                </span>
+                                            </div>
+                                            <small><i class="fas fa-envelope"></i> {{ usuario[4] or 'Sin email' }}</small>
+                                        </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <div class="text-center py-4">
+                                            <i class="fas fa-users fa-2x text-muted mb-3"></i>
+                                            <p class="text-muted mb-0">No hay usuarios registrados</p>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <h6><i class="fas fa-info-circle text-info"></i> Instrucciones</h6>
+                            <ul class="list-unstyled text-muted small">
+                                <li class="mb-2"><i class="fas fa-check-circle text-success"></i> Todos los campos son obligatorios</li>
+                                <li class="mb-2"><i class="fas fa-check-circle text-success"></i> La contraseña debe tener mínimo 6 caracteres</li>
+                                <li class="mb-2"><i class="fas fa-check-circle text-success"></i> El nombre de usuario debe ser único</li>
+                                <li class="mb-2"><i class="fas fa-check-circle text-success"></i> Los administradores tienen acceso completo</li>
+                                <li><i class="fas fa-check-circle text-success"></i> Los recepcionistas pueden gestionar reservas</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <!-- Registration Form JavaScript -->
+    <script>
+        // Password strength checker
+        function checkPasswordStrength(password) {
+            const strengthBar = document.getElementById('passwordStrength');
+            let strength = 0;
+            
+            // Check password length
+            if (password.length >= 6) strength += 25;
+            if (password.length >= 8) strength += 25;
+            
+            // Check for mixed case
+            if (password.match(/([a-z].*[A-Z])|([A-Z].*[a-z])/)) strength += 25;
+            
+            // Check for numbers
+            if (password.match(/([0-9])/)) strength += 25;
+            
+            // Update strength bar
+            strengthBar.style.width = strength + '%';
+            
+            // Update color based on strength
+            if (strength < 50) {
+                strengthBar.className = 'strength-bar strength-weak';
+            } else if (strength < 75) {
+                strengthBar.className = 'strength-bar strength-medium';
+            } else {
+                strengthBar.className = 'strength-bar strength-strong';
+            }
+        }
+        
+        // Password match checker
+        function checkPasswordMatch() {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            const matchDiv = document.getElementById('passwordMatch');
+            
+            if (confirmPassword === '') {
+                matchDiv.innerHTML = '';
+                return;
+            }
+            
+            if (password === confirmPassword) {
+                matchDiv.innerHTML = '<span class="text-success"><i class="fas fa-check-circle"></i> Las contraseñas coinciden</span>';
+            } else {
+                matchDiv.innerHTML = '<span class="text-danger"><i class="fas fa-exclamation-circle"></i> Las contraseñas no coinciden</span>';
+            }
+        }
+        
+        // Form validation before submit
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            const submitBtn = document.getElementById('submitBtn');
+            
+            // Check password match
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Las contraseñas no coinciden. Por favor, verifica.');
+                return false;
+            }
+            
+            // Check password length
+            if (password.length < 6) {
+                e.preventDefault();
+                alert('La contraseña debe tener al menos 6 caracteres.');
+                return false;
+            }
+            
+            // Disable button to prevent double submission
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registrando...';
+            return true;
+        });
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkPasswordStrength('');
+            checkPasswordMatch();
+            
+            // Auto-dismiss alerts after 5 seconds
+            setTimeout(function() {
+                $('.alert').alert('close');
+            }, 5000);
+        });
+    </script>
+</body>
+</html>

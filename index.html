@@ -1,10 +1,11 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="es">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hostal el Pas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <!-- Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
@@ -115,8 +116,9 @@
         <!-- Barra de navegación sticky -->
         <nav class="container text-center">
             <a href="{{ url_for('login') }}" id="login-text">Iniciar sesión</a>
-            <a href="{{ url_for('contacto') }}" id="contact-text">Contacto</a>
-            <a href="{{ url_for('reservas') }}" id="reservas-text">Reservas</a>
+            <a href="{{ url_for('registro_cliente') }}" id="register-text">Registrarse</a> <!-- NUEVO -->
+            <a href="{{ url_for('contact') }}" id="contact-text">Contacto</a>
+            <a href="{{ url_for('ver_reservas') }}" id="reservas-text">Reservas</a>
 
             <!-- Selector de idiomas -->
             <select class="lang-selector" id="lang-select">
@@ -144,11 +146,6 @@
         </div>
     </main>
 
-    <!-- Flecha para volver al inicio o a la página anterior -->
-    <div class="back-arrow" onclick="goBack()">
-        <i class="fas fa-arrow-left"></i>
-    </div>
-
     <script>
         // Diccionario con las traducciones para cada idioma
         const translations = {
@@ -156,6 +153,7 @@
                 "hostal-name": "Hostal el Pas",
                 "login-text": "Iniciar sesión",
                 "contact-text": "Contacto",
+                "register-text": "Registrarse",
                 "reservas-text": "Reservas",
                 "welcome-message": "¡Bienvenido a tu hogar fuera de casa!",
                 "welcome-description": "Relájate y disfruta de una estancia cómoda en nuestro hostal. Aquí encontrarás todo lo que necesitas para tu comodidad."
@@ -164,6 +162,7 @@
                 "hostal-name": "Hostal el Pas",
                 "login-text": "Iniciar sessió",
                 "contact-text": "Contacte",
+                "register-text": "Registrar-se",
                 "reservas-text": "Reserves",
                 "welcome-message": "Benvingut a la teva llar fora de casa!",
                 "welcome-description": "Relaxeu-vos i gaudiu d'una estada còmoda al nostre hostal. Aquí trobareu tot el que necessiteu per a la vostra comoditat."
@@ -172,6 +171,7 @@
                 "hostal-name": "Hostal el Pas",
                 "login-text": "Login",
                 "contact-text": "Contact",
+                "register-text": "Register",
                 "reservas-text": "Reservations",
                 "welcome-message": "Welcome to your home away from home!",
                 "welcome-description": "Relax and enjoy a comfortable stay at our hostel. Here you will find everything you need for your comfort."
